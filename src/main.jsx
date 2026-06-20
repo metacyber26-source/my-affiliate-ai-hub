@@ -9,7 +9,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Memuat riwayat copywriting terakhir dari HP saat aplikasi dibuka
   useEffect(() => {
     const savedResult = localStorage.getItem('affilix_last_result');
     if (savedResult) setResult(savedResult);
@@ -25,9 +24,13 @@ function App() {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) throw new Error("API Key Gemini belum diatur di Vercel!");
 
-      // Inisialisasi SDK GoogleGenerativeAI yang valid
       const ai = new GoogleGenerativeAI(apiKey);
-      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      // Perbaikan: Menambahkan apiVersion 'v1beta' agar model gemini-1.5-flash bisa ditemukan
+      const model = ai.getGenerativeModel({ 
+        model: 'gemini-1.5-flash',
+        apiVersion: 'v1beta'
+      });
 
       const prompt = `Kamu adalah ahli digital marketing dan affiliate top. Buatkan copywriting yang sangat persuasif, viral, dan menghasilkan konversi penjualan tinggi untuk produk "${productName}" khusus untuk platform ${platform}. Berikan hook 3 detik pertama yang mematikan, isi yang bikin penasaran, dan Call to Action (CTA) yang kuat agar penonton mengklik link afiliasi di bio. Tambahkan juga beberapa rekomendasi hashtag tren.`;
 
@@ -35,7 +38,7 @@ function App() {
       const textResult = response.response.text();
       
       setResult(textResult);
-      localStorage.setItem('affilix_last_result', textResult); // Simpan ke storage HP
+      localStorage.setItem('affilix_last_result', textResult);
     } catch (error) {
       setResult(`Gagal membuat konten: ${error.message}`);
     } finally {
@@ -47,12 +50,11 @@ function App() {
     if (!result) return;
     navigator.clipboard.writeText(result);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000); // Reset status tombol salin setelah 2 detik
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="min-h-screen p-4 max-w-md mx-auto flex flex-col justify-between select-none">
-      {/* Header */}
       <header className="py-4 border-b border-slate-800 text-center">
         <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
           🚀 AffiliX AI Hub
@@ -60,7 +62,6 @@ function App() {
         <p className="text-xs text-slate-400 mt-1">Asisten Afiliasi Privat Mandiri</p>
       </header>
 
-      {/* Main Form */}
       <main className="flex-1 my-6 space-y-5">
         <div>
           <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -101,7 +102,7 @@ function App() {
           type="button"
           onClick={generateContent}
           disabled={loading}
-          className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex justify-center items-center gap-2"
+          className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex justify-center items-center gap-2"
         >
           {loading ? (
             <>
@@ -116,7 +117,6 @@ function App() {
           )}
         </button>
 
-        {/* Output Area */}
         {result && (
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3 animate-fadeIn">
             <div className="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -140,7 +140,6 @@ function App() {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="text-center py-2 text-[10px] text-slate-500 border-t border-slate-800/50">
         AffiliX AI • Di-host via Vercel HP
       </footer>
@@ -148,7 +147,6 @@ function App() {
   );
 }
 
-// Inisialisasi Root DOM
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
